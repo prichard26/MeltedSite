@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Melted</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Melted</h1>
+        
+        <div class="bear-container">
+            <img src="best.gif" alt="Melted" class="bear-gif">
+        </div>
+        
+        <div class="email-section">
+            <input 
+                type="email" 
+                id="emailInput" 
+                placeholder="Enter your email to join the beta" 
+                class="email-input"
+            >
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+            <button id="joinButton" class="submit-button">Get Early Access</button>
+        </div>
+    </div>
+    
+    <script>
+        const emailInput = document.getElementById('emailInput');
+        const joinButton = document.getElementById('joinButton');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        // Email validation function
+        function validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        // Show error function
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            emailInput.style.borderColor = '#ef4444';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+                emailInput.style.borderColor = '';
+            }, 3000);
+        }
+        
+        joinButton.addEventListener('click', async function() {
+            const email = emailInput.value.trim();
+            
+            // Clear any previous errors
+            errorMessage.style.display = 'none';
+            emailInput.style.borderColor = '';
+            
+            // Validation
+            if (!email) {
+                showError('Please enter your email address');
+                return;
+            }
+            
+            if (!validateEmail(email)) {
+                showError('Please enter a valid email address');
+                return;
+            }
+            
+            // Disable button and show loading
+            joinButton.disabled = true;
+            joinButton.textContent = 'Joining...';
+            
+            try {
+                // Silent POST to FormSubmit.co AJAX endpoint
+                const formData = new FormData();
+                formData.append('email', email);
+                formData.append('_subject', 'New Melted Signup');
+                formData.append('_captcha', 'false');
+                
+                const response = await fetch('https://formsubmit.co/ajax/polar.melted.bear@gmail.com', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    // Success - update UI
+                    joinButton.textContent = 'You\'re in !';
+                    joinButton.disabled = true;
+                    emailInput.style.display = 'none';
+                } else {
+                    throw new Error('Submission failed');
+                }
+            } catch (error) {
+                // Error handling
+                console.error('Error:', error);
+                joinButton.disabled = false;
+                joinButton.textContent = 'Get Early Access';
+                alert('Something went wrong. Please try again.');
+            }
+        });
+        
+        // Allow Enter key to submit
+        emailInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                joinButton.click();
+            }
+        });
+    </script>
+</body>
+</html>
+
